@@ -1,64 +1,3 @@
-// // component com prisma e trpc
-
-// import { useQuery, useMutation } from '@trpc/client';
-// import { Task } from 'models';
-// import { getTasks, createTask, updateTask } from 'api/tasks'; // Exemplo de nomenclatura
-// import { useState } from 'react';
-
-// function TodoList() {
-//   const { data: tasks } = useQuery(['tasks.all'], getTasks);
-//   const addTask = useMutation(createTask);
-//   const updateTaskStatus = useMutation(updateTask);
-//   const [newTaskTitle, setNewTaskTitle] = useState('');
-
-//   const handleAddTask = async () => {
-//     if (!newTaskTitle) return;
-
-//     await addTask.mutateAsync({ title: newTaskTitle });
-//     setNewTaskTitle('');
-//   };
-
-//   const handleTaskStatusChange = async (task: Task) => {
-//     await updateTaskStatus.mutateAsync({ id: task.id, completed: !task.completed });
-//   };
-
-//   return (
-//     <div className="bg-black p-4">
-//       <h1 className="text-white text-2xl">To-Do List</h1>
-//       <div className="flex mt-4 space-x-2">
-//         <input
-//           type="text"
-//           placeholder="Nova tarefa"
-//           className="w-full py-2 px-3 rounded-lg border border-gray-300 text-black"
-//           value={newTaskTitle}
-//           onChange={(e) => setNewTaskTitle(e.target.value)}
-//         />
-//         <button
-//           onClick={handleAddTask}
-//           className="bg-blue-500 text-white py-2 px-4 rounded-lg"
-//         >
-//           Adicionar
-//         </button>
-//       </div>
-//       <ul className="mt-4 space-y-2">
-//         {tasks?.map((task) => (
-//           <li key={task.id} className="flex items-center">
-//             <input
-//               type="checkbox"
-//               checked={task.completed}
-//               onChange={() => handleTaskStatusChange(task)}
-//               className="w-5 h-5 rounded-full border border-gray-300 checked:bg-blue-500 checked:border-transparent"
-//             />
-//             <span className={`ml-2 ${task.completed ? 'line-through text-gray-400' : 'text-white'}`}>{task.title}</span>
-//           </li>
-//         ))}
-//       </ul>
-//     </div>
-//   );
-// }
-
-// export default TodoList;
-
 
 // components/TaskList.tsx localstorage
 
@@ -71,7 +10,7 @@ const TaskList = () => {
   useEffect(() => {
     const storedTasks = localStorage.getItem('tasks');
     if (storedTasks) {
-      setTasks(storedTasks.split(','));
+      setTasks(JSON.parse(storedTasks));
     }
   }, []);
 
@@ -92,32 +31,37 @@ const TaskList = () => {
 
   const toggleComplete = (index: number) => {
     const updatedTasks = [...tasks];
-    updatedTasks[index] = `✅ ${tasks[index]}`;
+    if (updatedTasks[index]) {
+      updatedTasks[index] = `✅ ${tasks[index]?.substring(2)}`;
+    } 
     setTasks(updatedTasks);
   };
 
+
+
   return (
     <div>
-      <h1>Lista de Tarefas</h1>
+      <h1 className="text-black mt-4">Add todo item</h1>
       <input
         type="text"
-        placeholder="Nova Tarefa"
+        placeholder="new task"
         value={newTask}
         onChange={(e) => setNewTask(e.target.value)}
+        className="text-black border rounded-lg p-2 m-2"
       />
-      <button onClick={addTask}>Adicionar</button>
-      <ul>
+      <button onClick={addTask} className="bg-blue-500 text-black px-3 py-2 rounded-lg">Add todo item</button>
+      <ul className="list-none">
         {tasks.map((task, index) => (
-          <li key={index}>
-            <label>
-              <input type="checkbox" onChange={() => toggleComplete(index)} />
+          <li key={index} className="flex justify-between items-center border p-2 m-2 rounded-lg">
+            <label className="flex items-center text-black">
+              <input type="checkbox" onChange={() => toggleComplete(index)} className="text-black rounded-full h-6 w-6 border-gray-300 mr-2" />
               {task.startsWith('✅ ') ? (
                 <del>{task.substring(2)}</del>
               ) : (
                 task
               )}
             </label>
-            <button onClick={() => deleteTask(index)}>Deletar</button>
+            <button onClick={() => deleteTask(index)} className="text-red-500">Delete</button>
           </li>
         ))}
       </ul>
@@ -126,6 +70,9 @@ const TaskList = () => {
 };
 
 export default TaskList;
+
+
+
 
 
 
