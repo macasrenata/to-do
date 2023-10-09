@@ -1,10 +1,18 @@
+import React, { useState, useEffect, KeyboardEvent } from 'react';
 
-// components/TaskList.tsx localstorage
+interface Task {
+  title: string;
+  subtasks: Subtask[];
+  completed: boolean;
+}
 
-import { useEffect, useState } from 'react';
+interface Subtask {
+  title: string;
+  completed: boolean;
+}
 
-const TaskList = () => {
-  const [tasks, setTasks] = useState<string[]>([]);
+const TaskList: React.FC = () => {
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [newTask, setNewTask] = useState<string>('');
 
   useEffect(() => {
@@ -20,48 +28,51 @@ const TaskList = () => {
 
   const addTask = () => {
     if (newTask.trim() === '') return;
-    setTasks([...tasks, newTask]);
+    const newTaskObject: Task = { title: newTask, completed: false, subtasks: [] };
+    setTasks([...tasks, newTaskObject]);
     setNewTask('');
   };
 
-  const deleteTask = (index: number) => {
-    const updatedTasks = tasks.filter((_, i) => i !== index);
-    setTasks(updatedTasks);
-  };
-
-  const toggleComplete = (index: number) => {
+  const toggleTaskComplete = (taskIndex: number) => {
     const updatedTasks = [...tasks];
-    if (updatedTasks[index]) {
-      updatedTasks[index] = `✅ ${tasks[index]?.substring(2)}`;
-    } 
-    setTasks(updatedTasks);
+    const task = updatedTasks[taskIndex];
+    if (task) {
+      task.completed = !task.completed;
+      setTasks(updatedTasks);
+    }
   };
 
-
+  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      addTask();
+    }
+  };
 
   return (
-    <div>
-      <h1 className="text-black mt-4">Add todo item</h1>
+    <div className="bg-charcoal-700 text-white p-4 rounded-lg shadow-lg">
+      <h1 className="text-2xl mb-4">Lista de Tarefas</h1>
       <input
         type="text"
-        placeholder="new task"
+        placeholder="Nova Tarefa"
         value={newTask}
         onChange={(e) => setNewTask(e.target.value)}
-        className="text-black border rounded-lg p-2 m-2"
+        onKeyPress={handleKeyPress}
+        className="border-b-2 border-white bg-charcoal-700 focus:outline-none p-2 text-white mb-4"
       />
-      <button onClick={addTask} className="bg-blue-500 text-black px-3 py-2 rounded-lg">Add todo item</button>
-      <ul className="list-none">
-        {tasks.map((task, index) => (
-          <li key={index} className="flex justify-between items-center border p-2 m-2 rounded-lg">
-            <label className="flex items-center text-black">
-              <input type="checkbox" onChange={() => toggleComplete(index)} className="text-black rounded-full h-6 w-6 border-gray-300 mr-2" />
-              {task.startsWith('✅ ') ? (
-                <del>{task.substring(2)}</del>
-              ) : (
-                task
-              )}
+      <ul className="list-none p-0">
+        {tasks.map((task, taskIndex) => (
+          <li
+            key={taskIndex}
+            className={`mb-2 p-2 ${task.completed ? 'line-through' : ''}`}
+          >
+            <label className="flex items-center text-white">
+              <input
+                type="checkbox"
+                onChange={() => toggleTaskComplete(taskIndex)}
+                className="mr-2 h-6 w-6 rounded-full border border-white bg-transparent text-white appearance-none focus:outline-none"
+              />
+              {task.title}
             </label>
-            <button onClick={() => deleteTask(index)} className="text-red-500">Delete</button>
           </li>
         ))}
       </ul>
@@ -70,10 +81,3 @@ const TaskList = () => {
 };
 
 export default TaskList;
-
-
-
-
-
-
-
